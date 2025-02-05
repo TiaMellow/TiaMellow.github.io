@@ -35,8 +35,11 @@
         <label for="amountPaid">Amount Paid ($):</label>
         <input type="number" id="amountPaid" placeholder="Enter amount paid">
 
-        <label for="daysLeft">Days Left Before 180:</label>
-        <input type="number" id="daysLeft" placeholder="Enter days left">
+        <label for="startDate">Device Received Date:</label>
+        <input type="date" id="startDate">
+        
+        <label for="cancelDate">Cancellation Date (Defaults to Today):</label>
+        <input type="date" id="cancelDate">
         
         <label>
             <input type="checkbox" id="bugFix"> Add 60 days (Bug Fix)
@@ -44,26 +47,36 @@
 
         <button onclick="calculateFee()">Calculate</button>
         <h3 id="result"></h3>
+        <h4 id="daysAnnounce"></h4>
     </div>
 
     <script>
         function calculateFee() {
             let retailPrice = parseFloat(document.getElementById('retailPrice').value);
             let amountPaid = parseFloat(document.getElementById('amountPaid').value);
-            let daysLeft = parseInt(document.getElementById('daysLeft').value);
+            let startDate = new Date(document.getElementById('startDate').value);
+            let cancelDateInput = document.getElementById('cancelDate').value;
+            let cancelDate = cancelDateInput ? new Date(cancelDateInput) : new Date();
             let bugFix = document.getElementById('bugFix').checked;
+
+            if (isNaN(retailPrice) || isNaN(amountPaid) || isNaN(startDate.getTime())) {
+                document.getElementById('result').innerText = "Please enter valid numbers.";
+                return;
+            }
+
+            let daysUsed = Math.floor((cancelDate - startDate) / (1000 * 60 * 60 * 24));
+            let daysLeft = 180 - daysUsed;
 
             if (bugFix) {
                 daysLeft += 60;
             }
 
-            if (isNaN(retailPrice) || isNaN(amountPaid) || isNaN(daysLeft) || daysLeft > 180 || daysLeft < 0) {
-                document.getElementById('result').innerText = "Please enter valid numbers.";
-                return;
-            }
+            if (daysLeft > 180) daysLeft = 180;
+            if (daysLeft < 0) daysLeft = 0;
 
             let fee = ((retailPrice - amountPaid) * daysLeft) / 180;
             document.getElementById('result').innerText = "Cancellation Fee: $" + fee.toFixed(2);
+            document.getElementById('daysAnnounce').innerText = "Days Used: " + daysUsed + " | Days Left Before 180: " + daysLeft;
         }
     </script>
 </body>
