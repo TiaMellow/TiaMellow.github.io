@@ -41,6 +41,9 @@
         <label for="cancelDate">Cancellation Date (Defaults to Today):</label>
         <input type="date" id="cancelDate">
         
+        <label for="daysLeft">Days Left Before 180:</label>
+        <input type="number" id="daysLeft" placeholder="Enter days left manually (optional)">
+        
         <label>
             <input type="checkbox" id="bugFix"> Add 60 days (Bug Fix)
         </label>
@@ -57,6 +60,7 @@
             let startDate = new Date(document.getElementById('startDate').value);
             let cancelDateInput = document.getElementById('cancelDate').value;
             let cancelDate = cancelDateInput ? new Date(cancelDateInput) : new Date();
+            let manualDaysLeft = parseInt(document.getElementById('daysLeft').value);
             let bugFix = document.getElementById('bugFix').checked;
 
             if (isNaN(retailPrice) || isNaN(amountPaid) || isNaN(startDate.getTime())) {
@@ -65,7 +69,7 @@
             }
 
             let daysUsed = Math.floor((cancelDate - startDate) / (1000 * 60 * 60 * 24));
-            let daysLeft = 180 - daysUsed;
+            let daysLeft = isNaN(manualDaysLeft) ? 180 - daysUsed : manualDaysLeft;
 
             if (bugFix) {
                 daysLeft += 60;
