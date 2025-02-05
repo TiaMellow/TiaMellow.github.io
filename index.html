@@ -29,30 +29,34 @@
 <body>
     <h2>Cancellation Fee Calculator</h2>
     <div class="container">
-        <label for="retailPrice">No-commitment Price ($):</label>
+        <label for="calculationMethod">Choose Calculation Method:</label>
+        <select id="calculationMethod" onchange="toggleInputs()">
+            <option value="option1">Option 1: Auto-calculate Days Left</option>
+            <option value="option2">Option 2: Enter Days Left Manually</option>
+        </select>
+
+        <div id="option1Inputs">
+            <label for="startDate">Device Received Date:</label>
+            <input type="date" id="startDate">
+            
+            <label for="cancelDate">Cancellation Date (Defaults to Today):</label>
+            <input type="date" id="cancelDate">
+        </div>
+
+        <div id="option2Inputs" style="display: none;">
+            <label for="daysLeft">Days Left Before 180:</label>
+            <input type="number" id="daysLeft" placeholder="Enter days left manually">
+            
+            <label>
+                <input type="checkbox" id="bugFix"> Add 60 days (Bug Fix)
+            </label>
+        </div>
+
+        <label for="retailPrice">Phone Retail Price ($):</label>
         <input type="number" id="retailPrice" placeholder="Enter retail price">
 
         <label for="amountPaid">Amount Paid ($):</label>
         <input type="number" id="amountPaid" placeholder="Enter amount paid">
-
-        <label for="startDate">Device Received Date:</label>
-        <input type="date" id="startDate">
-        
-        <label for="cancelDate">Cancellation Date (Defaults to Today):</label>
-        <input type="date" id="cancelDate">
-        
-        <label for="calculationMethod">Choose Calculation Method:</label>
-        <select id="calculationMethod">
-            <option value="auto">Auto-calculate Days Left</option>
-            <option value="manual">Enter Days Left Manually</option>
-        </select>
-        
-        <label for="daysLeft">Days Left Before 180 (if manual selected):</label>
-        <input type="number" id="daysLeft" placeholder="Enter days left manually" disabled>
-        
-        <label>
-            <input type="checkbox" id="bugFix"> Add 60 days (Bug Fix)
-        </label>
 
         <button id="calculateButton" onclick="calculateFee()">Calculate</button>
         <h3 id="result"></h3>
@@ -60,30 +64,35 @@
     </div>
 
     <script>
-        document.getElementById('calculationMethod').addEventListener('change', function() {
-            document.getElementById('daysLeft').disabled = this.value !== 'manual';
-        });
+        function toggleInputs() {
+            let method = document.getElementById('calculationMethod').value;
+            document.getElementById('option1Inputs').style.display = method === 'option1' ? 'block' : 'none';
+            document.getElementById('option2Inputs').style.display = method === 'option2' ? 'block' : 'none';
+        }
 
         function calculateFee() {
             let retailPrice = parseFloat(document.getElementById('retailPrice').value);
             let amountPaid = parseFloat(document.getElementById('amountPaid').value);
-            let startDate = new Date(document.getElementById('startDate').value);
-            let cancelDateInput = document.getElementById('cancelDate').value;
-            let cancelDate = cancelDateInput ? new Date(cancelDateInput) : new Date();
-            let calculationMethod = document.getElementById('calculationMethod').value;
+            let method = document.getElementById('calculationMethod').value;
             let bugFix = document.getElementById('bugFix').checked;
-            let manualDaysLeft = parseInt(document.getElementById('daysLeft').value);
-            
-            if (isNaN(retailPrice) || isNaN(amountPaid) || isNaN(startDate.getTime())) {
+            let daysLeft;
+
+            if (isNaN(retailPrice) || isNaN(amountPaid)) {
                 document.getElementById('result').innerText = "Please enter valid numbers.";
                 return;
             }
-            
-            let daysUsed = Math.floor((cancelDate - startDate) / (1000 * 60 * 60 * 24));
-            let daysLeft = calculationMethod === 'manual' && !isNaN(manualDaysLeft) ? manualDaysLeft : 180 - daysUsed;
-            
-            if (bugFix) {
-                daysLeft += 60;
+
+            if (method === 'option1') {
+                let startDate = new Date(document.getElementById('startDate').value);
+                let cancelDateInput = document.getElementById('cancelDate').value;
+                let cancelDate = cancelDateInput ? new Date(cancelDateInput) : new Date();
+                let daysUsed = Math.floor((cancelDate - startDate) / (1000 * 60 * 60 * 24));
+                daysLeft = 180 - daysUsed;
+            } else {
+                daysLeft = parseInt(document.getElementById('daysLeft').value);
+                if (bugFix) {
+                    daysLeft += 60;
+                }
             }
 
             if (daysLeft > 180) daysLeft = 180;
@@ -91,7 +100,7 @@
             
             let fee = ((retailPrice - amountPaid) * daysLeft) / 180;
             document.getElementById('result').innerText = "Cancellation Fee: $" + fee.toFixed(2);
-            document.getElementById('daysAnnounce').innerText = "Days Used: " + daysUsed + " | Days Left Before 180: " + daysLeft;
+            document.getElementById('daysAnnounce').innerText = "Days Left Before 180: " + daysLeft;
             
             if (Math.random() < 0.01) {
                 document.getElementById('calculateButton').innerText = "I'm ready to get yelled at by our valued customer";
@@ -102,4 +111,3 @@
     </script>
 </body>
 </html>
-
