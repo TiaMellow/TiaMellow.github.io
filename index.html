@@ -37,6 +37,10 @@
 
         <label for="daysLeft">Days Left Before 180:</label>
         <input type="number" id="daysLeft" placeholder="Enter days left">
+        
+        <label>
+            <input type="checkbox" id="bugFix"> Add 60 days (Bug Fix)
+        </label>
 
         <button onclick="calculateFee()">Calculate</button>
         <h3 id="result"></h3>
@@ -47,6 +51,11 @@
             let retailPrice = parseFloat(document.getElementById('retailPrice').value);
             let amountPaid = parseFloat(document.getElementById('amountPaid').value);
             let daysLeft = parseInt(document.getElementById('daysLeft').value);
+            let bugFix = document.getElementById('bugFix').checked;
+
+            if (bugFix) {
+                daysLeft += 60;
+            }
 
             if (isNaN(retailPrice) || isNaN(amountPaid) || isNaN(daysLeft) || daysLeft > 180 || daysLeft < 0) {
                 document.getElementById('result').innerText = "Please enter valid numbers.";
